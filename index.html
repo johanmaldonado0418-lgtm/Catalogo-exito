@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surtido Maestro - v34.0 INTELIGENTE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body { background-color: #f3f4f6; font-family: sans-serif; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .tab-active { border-bottom: 3px solid #1e40af; color: #1e40af; font-weight: bold; }
+        #reader, #reader-db { width: 100%; border-radius: 12px; overflow: hidden; background: #000; margin-top: 10px; display: none; min-height: 250px; }
+        .modal-overlay { background: rgba(0,0,0,0.8); display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        .dropdown-content { display: none; position: absolute; background-color: white; min-width: 250px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 60; max-height: 300px; overflow-y: auto; border-radius: 8px; margin-top: 5px; border: 1px solid #e5e7eb; }
+        .dropdown-content button { width: 100%; text-align: left; padding: 10px; border-bottom: 1px solid #f3f4f6; font-size: 11px; text-transform: uppercase; font-weight: bold; }
+        .dropdown-content button:hover { background-color: #eff6ff; color: #1e40af; }
+        #loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.8); z-index: 1000; flex-direction: column; align-items:center; justify-content:center; }
+    </style>
+</head>
+<body class="p-4">
+
+    <div id="loading-overlay">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-900 mb-2"></div>
+        <span class="text-[10px] font-black text-blue-900">SINCRONIZANDO NUBE...</span>
+    </div>
+
+    <div id="modalConfirmar" class="modal-overlay">
+        <div class="bg-white w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl border-2 border-blue-900">
+            <div id="modalHeader" class="bg-blue-900 p-4 text-white flex justify-between items-center">
+                <h3 id="modalTitle" class="font-black uppercase text-xs italic">Detalle</h3>
+                <span id="modalPrecioTag" class="bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold"></span>
+            </div>
+            <div class="p-5">
+                <div id="modalFicha" class="mb-4 border-b pb-4 text-sm font-bold text-blue-900 uppercase"></div>
+                <div id="controlesSurtido">
+                    <div class="grid grid-cols-2 gap-3 mb-2">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Empaque</label>
+                            <select id="modalTipoCaja" onchange="recalcularUnidadesModal()" class="w-full p-2 border rounded font-bold text-blue-700">
+                                <option value="0">Caja x 0</option><option value="1">Caja x 1</option><option value="2">Caja x 2</option><option value="3">Caja x 3</option><option value="4">Caja x 4</option><option value="5">Caja x 5</option><option value="6">Caja x 6</option><option value="7">Caja x 7</option><option value="8">Caja x 8</option><option value="9">Caja x 9</option><option value="10">Caja x 10</option><option value="11">Caja x 11</option><option value="12">Caja x 12</option><option value="13">Caja x 13</option><option value="14">Caja x 14</option><option value="15">Caja x 15</option><option value="16">Caja x 16</option><option value="17">Caja x 17</option><option value="18">Caja x 18</option><option value="19">Caja x 19</option><option value="20">Caja x 20</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Cant. Cajas</label>
+                            <input id="modalCantCajas" type="number" oninput="recalcularUnidadesModal()" class="w-full p-2 border rounded font-bold text-center text-blue-600" value="0" onclick="this.select()">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="text-[10px] font-bold text-orange-500 uppercase">Unidades a Sumar</label>
+                        <input id="modalUnidadesFinal" type="number" class="w-full p-3 border-2 border-orange-200 rounded-lg font-black text-center text-xl text-orange-600" value="0">
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="cerrarModal()" class="flex-1 py-3 bg-gray-100 text-gray-500 rounded-xl font-bold uppercase text-[10px]">Cerrar</button>
+                    <button id="btnAccionModal" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold uppercase text-[10px]">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto">
+        <div class="flex justify-around mb-4 bg-white rounded-lg p-2 shadow-sm sticky top-0 z-50">
+            <button onclick="switchTab('surtido')" id="btn-surtido" class="tab-active py-2 px-4 text-sm uppercase">Surtido</button>
+            <button onclick="switchTab('precios')" id="btn-precios" class="py-2 px-4 text-gray-500 text-sm uppercase">Catálogo</button>
+            <button onclick="switchTab('historial')" id="btn-historial" class="py-2 px-4 text-gray-500 text-sm uppercase">Historial</button>
+        </div>
+
+        <div id="tab-surtido">
+            <div class="card p-4 mb-4 border border-blue-100 grid grid-cols-2 gap-2">
+                <div><label class="text-[9px] font-black text-blue-900 uppercase">Surtidor</label><input id="nombreSurtidor" type="text" class="w-full p-2 border rounded text-xs font-bold uppercase" oninput="guardarPerfil()"></div>
+                <div><label class="text-[9px] font-black text-blue-900 uppercase">Almacén</label><input id="nombreAlmacen" type="text" class="w-full p-2 border rounded text-xs font-bold uppercase" oninput="guardarPerfil()"></div>
+            </div>
+            
+            <div class="card p-4 mb-4 border border-blue-200">
+                <button onclick="toggleScanner('surtido')" id="btn-scanner" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold uppercase text-xs"> Cámara Surtido</button>
+                <div id="reader"></div>
+            </div>
+
+            <div class="card p-5 mb-6 relative">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="flex items-center gap-2">
+                        <label class="text-[9px] font-black text-blue-900 uppercase italic">Buscador Maestro</label>
+                        <button onclick="toggleDropdownCatalogo()" class="bg-blue-100 text-blue-700 px-2 rounded font-bold text-xs"></button>
+                    </div>
+                    <button onclick="sincronizarConNube()" class="text-blue-600 font-black text-[10px] uppercase italic animate-pulse"> Actualizar Nube</button>
+                </div>
+                
+                <div id="dropdownCatalogo" class="dropdown-content"></div>
+
+                <div class="flex gap-1">
+                    <button onclick="resetSurtidoInputs()" class="bg-gray-200 px-3 rounded-lg text-lg"></button>
+                    <input id="ref" type="text" placeholder="REF / PLU / EAN" oninput="busquedaDinamica()" class="flex-1 p-2 rounded-lg bg-blue-50 font-bold border border-blue-100 uppercase">
+                    <button onclick="forzarBusquedaLupa()" class="bg-blue-600 text-white p-2 rounded-lg text-lg"></button>
+                </div>
+            </div>
+
+            <div class="card overflow-hidden mb-4">
+                <div class="bg-gray-800 text-white p-2 flex justify-between items-center text-[8px] uppercase font-bold">
+                    <span>Listado de Surtido</span>
+                    <button onclick="vaciarTodo()" class="bg-red-700 px-2 py-1 rounded italic text-[7px]"> Barrer Todo</button>
+                </div>
+                <table class="w-full text-[11px] text-left">
+                    <thead class="bg-gray-100 text-gray-600 uppercase text-[8px]"><tr><th class="p-2">Artículo</th><th class="p-2 text-center">Caj</th><th class="p-2 text-center">U.Tot</th><th class="p-2"></th></tr></thead>
+                    <tbody id="listaSurtido" class="divide-y divide-gray-100"></tbody>
+                    <tfoot class="bg-blue-900 text-white font-black italic"><tr><td colspan="2" class="p-3 text-right text-[10px]">TOTAL:</td><td id="granTotal" class="p-3 text-center text-lg">0</td><td></td></tr></tfoot>
+                </table>
+            </div>
+
+            <div class="card p-4 mb-10 border border-green-200">
+                <input id="fechaPicking" type="date" class="w-full p-2 border rounded font-bold text-blue-900 mb-2">
+                <button onclick="finalizarDia()" class="w-full p-3 bg-green-600 text-white rounded-lg text-[11px] font-bold uppercase shadow-lg"> Guardar en Historial</button>
+            </div>
+        </div>
+
+        <div id="tab-precios" class="hidden">
+            <div class="card p-4 mb-4 border border-green-200">
+                <button onclick="toggleScanner('catalogo')" class="w-full bg-green-700 text-white py-2 rounded-lg font-bold uppercase text-xs"> Cámara Catálogo</button>
+                <div id="reader-db"></div>
+            </div>
+            <div class="card p-4 mb-4 bg-green-50 border border-green-200">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-black text-green-800 text-[10px] uppercase italic">Editor de Productos</h3>
+                    <button onclick="resetDBInputs()" class="text-green-600 text-[10px] font-bold uppercase"> Limpiar</button>
+                </div>
+                <div class="grid grid-cols-1 gap-2">
+                    <div class="flex gap-1">
+                        <input id="db-ref" type="text" placeholder="Código / PLU" class="flex-1 p-2 rounded border font-bold uppercase">
+                        <button onclick="verificarEnCatalogo()" class="bg-green-700 text-white p-2 rounded-lg"></button>
+                    </div>
+                    <div class="flex gap-2">
+                        <input id="db-desc" type="text" placeholder="Nombre" class="flex-1 p-2 rounded border uppercase font-bold">
+                        <input id="db-gr" type="text" placeholder="gr" class="w-20 p-2 rounded border uppercase font-bold text-center">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="db-plu" type="text" placeholder="PLU" class="p-2 rounded border font-bold">
+                        <input id="db-marca" type="text" placeholder="Marca" class="p-2 rounded border uppercase font-bold">
+                    </div>
+                    <input id="db-precio" type="number" placeholder="Precio $" class="p-2 rounded border font-bold text-green-700">
+                    
+                    <div class="flex gap-2">
+                        <button id="btnEliminarDB" onclick="eliminarProductoActual()" class="hidden flex-1 bg-red-600 text-white p-3 rounded font-bold uppercase text-[10px]">Eliminar</button>
+                        <button onclick="guardarEnCatalogo()" class="flex-[2] bg-green-700 text-white p-3 rounded font-bold uppercase text-[10px]">Guardar</button>
+                    </div>
+                </div>
+            </div>
+            <div id="db-lista" class="card p-2 divide-y divide-gray-100 text-[10px] max-h-60 overflow-y-auto"></div>
+        </div>
+
+        <div id="tab-historial" class="hidden">
+            <div class="card p-4 mb-4 bg-blue-50 border border-blue-200">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="font-black text-blue-900 text-[10px] uppercase italic">Reportes Históricos</h2>
+                    <button onclick="borrarTodoHistorial()" class="bg-red-600 text-white text-[9px] px-2 py-1 rounded font-black uppercase italic"> Limpiar Todo</button>
+                </div>
+                <div id="listaHistorial" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbxNj_qkhubhEUJHZtOZOzI23iTxnxBwzfjlBmneNAdmCb0YcKd3RL6xWZ3Ei1B9UgW5Cg/exec";
+
+        let registros = JSON.parse(localStorage.getItem('surtido_v21_final')) || [];
+        let catalogo = JSON.parse(localStorage.getItem('catalogo_db')) || {};
+        let historial = JSON.parse(localStorage.getItem('historial_picking_v2')) || [];
+        let perfil = JSON.parse(localStorage.getItem('perfil_blaebuck')) || { surtidor: '', almacen: '' };
+        
+        let html5QrCode = null; let pEscaneado = null; let idxGlobal = -1;
+        const formatMoney = (v) => v ? parseInt(v).toLocaleString('de-DE') + " $" : "0 $";
+
+        async function sincronizarConNube() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+            try {
+                const response = await fetch(URL_GOOGLE + "?action=getCatalog");
+                const data = await response.json();
+                if (data) {
+                    catalogo = data;
+                    localStorage.setItem('catalogo_db', JSON.stringify(catalogo));
+                    renderizarCatalogo();
+                    alert("¡Catálogo Blaebuck sincronizado!");
+                }
+            } catch (error) {
+                alert("Error de conexión. Intenta de nuevo.");
+            }
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function switchTab(t) {
+            detenerEscaner();
+            document.getElementById('tab-surtido').classList.toggle('hidden', t !== 'surtido');
+            document.getElementById('tab-precios').classList.toggle('hidden', t !== 'precios');
+            document.getElementById('tab-historial').classList.toggle('hidden', t !== 'historial');
+            ['btn-surtido', 'btn-precios', 'btn-historial'].forEach(id => {
+                document.getElementById(id).className = (id === `btn-${t}` ? 'tab-active py-2 px-4 text-sm uppercase' : 'py-2 px-4 text-gray-500 text-sm uppercase');
+            });
+            if(t === 'historial') renderizarHistorial();
+        }
+
+        function toggleDropdownCatalogo() {
+            const dropdown = document.getElementById('dropdownCatalogo');
+            if (dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+            } else {
+                renderizarListaDesplegable();
+                dropdown.style.display = 'block';
+            }
+        }
+
+        function renderizarListaDesplegable() {
+            const dropdown = document.getElementById('dropdownCatalogo');
+            dropdown.innerHTML = '';
+            const claves = Object.keys(catalogo);
+            if(claves.length === 0) {
+                dropdown.innerHTML = '<div class="p-4 text-center text-xs text-gray-400">CATÁLOGO VACÍO</div>';
+                return;
+            }
+            claves.sort((a,b) => catalogo[a].desc.localeCompare(catalogo[b].desc)).forEach(ref => {
+                const p = catalogo[ref];
+                const btn = document.createElement('button');
+                btn.innerHTML = `<span>${p.desc}</span><br><span class="text-[9px] text-blue-500">REF: ${ref.slice(-4)} | PLU: ${p.plu}</span>`;
+                btn.onclick = () => {
+                    pEscaneado = { ref: ref, ...p };
+                    abrirFicha();
+                    document.getElementById('dropdownCatalogo').style.display = 'none';
+                };
+                dropdown.appendChild(btn);
+            });
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.bg-blue-100') && !event.target.matches('.bg-blue-100 *')) {
+                const dropdown = document.getElementById('dropdownCatalogo');
+                if (dropdown && dropdown.style.display === 'block') {
+                    dropdown.style.display = 'none';
+                }
+            }
+        }
+
+        function busquedaDinamica() {
+            const v = document.getElementById('ref').value.trim();
+            if (v.length === 4) {
+                let e = Object.keys(catalogo).find(k => k.endsWith(v));
+                if (e) { pEscaneado = { ref: e, ...catalogo[e] }; abrirFicha(); document.getElementById('ref').value = ""; }
+            } else if (v.length >= 10) {
+                let e = Object.keys(catalogo).find(k => k === v);
+                if (e) { pEscaneado = { ref: e, ...catalogo[e] }; abrirFicha(); document.getElementById('ref').value = ""; }
+            }
+        }
+
+        function forzarBusquedaLupa() {
+            const v = document.getElementById('ref').value.trim();
+            if(!v) return;
+            let e = Object.keys(catalogo).find(k => k === v || k.endsWith(v) || (catalogo[k] && catalogo[k].plu === v));
+            if (e) { pEscaneado = { ref: e, ...catalogo[e] }; abrirFicha(); document.getElementById('ref').value = ""; }
+            else { switchTab('precios'); document.getElementById('db-ref').value = v; verificarEnCatalogo(); }
+        }
+
+        function abrirFicha() {
+            idxGlobal = registros.findIndex(r => r.ref === pEscaneado.ref);
+            document.getElementById('modalPrecioTag').innerText = formatMoney(pEscaneado.precio);
+            document.getElementById('modalFicha').innerHTML = `
+                <div class="text-lg font-black text-blue-900 uppercase leading-none">${pEscaneado.desc}</div>
+                <div class="text-[10px] font-bold text-blue-500 mb-4 italic">${pEscaneado.marca}</div>
+                <div class="flex justify-between items-end">
+                    <span class="text-orange-600 font-black text-sm italic">GR: ${pEscaneado.gr}</span>
+                    <div class="text-right">
+                        <div class="text-[9px] font-bold text-gray-400 leading-none">REF: ${pEscaneado.ref.slice(-4)}</div>
+                        <div class="text-red-700 font-black text-xs leading-none">PLU: ${pEscaneado.plu}</div>
+                    </div>
+                </div>`;
+            document.getElementById('modalTipoCaja').value = "0"; document.getElementById('modalCantCajas').value = 0; document.getElementById('modalUnidadesFinal').value = 0;
+            document.getElementById('btnAccionModal').onclick = guardarPicking;
+            document.getElementById('modalConfirmar').style.display = 'flex';
+        }
+
+        function guardarPicking() { 
+            const u = parseInt(document.getElementById('modalUnidadesFinal').value) || 0; 
+            const f = parseInt(document.getElementById('modalTipoCaja').value);
+            const c = (f === 0) ? 0 : (parseInt(document.getElementById('modalCantCajas').value) || 0); 
+
+            fetch(URL_GOOGLE, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    surtidor: document.getElementById('nombreSurtidor').value || "ANÓNIMO",
+                    almacen: document.getElementById('nombreAlmacen').value || "GENERAL",
+                    producto: pEscaneado.desc,
+                    plu: pEscaneado.plu,
+                    marca: pEscaneado.marca,
+                    ref: pEscaneado.ref,
+                    cantidad: u
+                })
+            });
+            
+            if(idxGlobal !== -1) { registros[idxGlobal].totalCajas += c; registros[idxGlobal].unidadesDeCajas += u; } 
+            else { registros.push({ ...pEscaneado, totalCajas: c, unidadesDeCajas: u }); } 
+            renderizar(); cerrarModal(); resetSurtidoInputs(); 
+        }
+
+        function renderizar() { 
+            const l = document.getElementById('listaSurtido'); l.innerHTML = ''; let t = 0; 
+            registros.forEach((item, i) => { t += item.unidadesDeCajas; l.innerHTML += `<tr class="border-b"><td class="p-2"><div class="font-bold text-[10px] text-blue-700 leading-tight">${item.desc}</div><div class="text-[9px] text-red-800 font-bold">REF: ${item.ref.slice(-4)}</div></td><td class="p-2 text-center text-gray-400 font-bold">${item.totalCajas}</td><td class="p-2 text-center font-black bg-blue-50 text-blue-800">${item.unidadesDeCajas}</td><td class="p-2 text-right"><button onclick="borrarItem(${i})" class="text-red-300"></button></td></tr>`; }); 
+            document.getElementById('granTotal').innerText = t; 
+            localStorage.setItem('surtido_v21_final', JSON.stringify(registros)); 
+        }
+
+        function finalizarDia() { 
+            const f = document.getElementById('fechaPicking').value; 
+            const alm = document.getElementById('nombreAlmacen').value.toUpperCase();
+            if(!f || registros.length === 0) return alert("Nada que guardar"); 
+            
+            let indexExistente = historial.findIndex(h => h.fecha === f && h.almacen === alm);
+            if(indexExistente !== -1) {
+                registros.forEach(nuevo => {
+                    let itemIndex = historial[indexExistente].items.findIndex(it => it.ref === nuevo.ref);
+                    if(itemIndex !== -1) {
+                        historial[indexExistente].items[itemIndex].totalCajas += nuevo.totalCajas;
+                        historial[indexExistente].items[itemIndex].unidadesDeCajas += nuevo.unidadesDeCajas;
+                    } else {
+                        historial[indexExistente].items.push({...nuevo});
+                    }
+                });
+                historial[indexExistente].total = historial[indexExistente].items.reduce((acc, it) => acc + it.unidadesDeCajas, 0);
+            } else {
+                historial.unshift({ fecha: f, total: parseInt(document.getElementById('granTotal').innerText), surtidor: document.getElementById('nombreSurtidor').value, almacen: alm, items: [...registros] }); 
+            }
+            localStorage.setItem('historial_picking_v2', JSON.stringify(historial)); 
+            registros = []; renderizar(); alert("Reporte guardado"); 
+        }
+
+        function renderizarHistorial() { 
+            const l = document.getElementById('listaHistorial'); l.innerHTML = ''; 
+            historial.forEach((h, i) => { 
+                l.innerHTML += `
+                <div class="p-3 bg-white rounded-lg border-l-4 border-blue-900 mb-2 flex justify-between items-center">
+                    <div onclick="generarPDF(${i})" class="flex-1">
+                        <div class="font-black text-[10px] uppercase"> ${h.fecha} | ${h.almacen}</div>
+                        <div class="text-blue-900 text-xs font-bold">${h.total} UNIDADES SURTIDAS</div>
+                    </div>
+                    <button onclick="borrarDelHistorial(${i})" class="text-red-500 font-bold px-2"></button>
+                </div>`; 
+            }); 
+        }
+
+        function borrarDelHistorial(idx) {
+            if(confirm("¿Eliminar reporte?")) {
+                historial.splice(idx, 1);
+                localStorage.setItem('historial_picking_v2', JSON.stringify(historial));
+                renderizarHistorial();
+            }
+        }
+
+        function generarPDF(idx) { 
+            const { jsPDF } = window.jspdf; 
+            const doc = new jsPDF('p', 'pt', 'letter'); 
+            const h = historial[idx]; 
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bold');
+            doc.rect(40, 40, 532, 40); 
+            doc.text(`SURTIDOR: ${h.surtidor.toUpperCase()}`, 50, 56);
+            doc.text(`ALMACÉN: ${h.almacen.toUpperCase()}`, 240, 56);
+            doc.text(`FECHA: ${h.fecha}`, 450, 56);
+            doc.autoTable({
+                startY: 90,
+                head: [['#', 'DESCRIPCIÓN', 'MARCA', 'REF', 'PLU', 'SOL.', 'ENT.']],
+                body: h.items.map((it, i) => [i + 1, it.desc.toUpperCase(), it.marca.toUpperCase(), it.ref, it.plu, it.unidadesDeCajas, it.unidadesDeCajas]),
+                theme: 'grid',
+                styles: { fontSize: 7 }
+            });
+            doc.save(`picking - ${h.almacen} - ${h.fecha}.pdf`); 
+        }
+
+        function verificarEnCatalogo() {
+            const v = document.getElementById('db-ref').value.trim();
+            if(!v) return;
+            let refFound = Object.keys(catalogo).find(k => k === v || k.endsWith(v) || (catalogo[k] && catalogo[k].plu === v));
+            if (refFound) {
+                const p = catalogo[refFound];
+                document.getElementById('db-ref').value = refFound;
+                document.getElementById('db-desc').value = p.desc;
+                document.getElementById('db-gr').value = p.gr;
+                document.getElementById('db-plu').value = p.plu;
+                document.getElementById('db-marca').value = p.marca;
+                document.getElementById('db-precio').value = p.precio;
+                document.getElementById('btnEliminarDB').classList.remove('hidden');
+            } else { document.getElementById('btnEliminarDB').classList.add('hidden'); }
+        }
+
+        function guardarEnCatalogo() { 
+            const r = document.getElementById('db-ref').value.trim(); if(!r) return;
+            catalogo[r] = { desc: document.getElementById('db-desc').value.toUpperCase(), gr: document.getElementById('db-gr').value.toUpperCase(), plu: document.getElementById('db-plu').value, marca: document.getElementById('db-marca').value.toUpperCase(), precio: document.getElementById('db-precio').value }; 
+            localStorage.setItem('catalogo_db', JSON.stringify(catalogo)); 
+            fetch(URL_GOOGLE, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({ tipo: 'catalogo', ref: r, desc: catalogo[r].desc, gr: catalogo[r].gr, plu: catalogo[r].plu, marca: catalogo[r].marca, precio: catalogo[r].precio })
+            });
+            renderizarCatalogo(); resetDBInputs(); alert("Guardado");
+        }
+
+        function eliminarProductoActual() {
+            const r = document.getElementById('db-ref').value.trim();
+            if(r && confirm(`¿Eliminar ${catalogo[r].desc}?`)) {
+                delete catalogo[r];
+                localStorage.setItem('catalogo_db', JSON.stringify(catalogo));
+                renderizarCatalogo(); resetDBInputs();
+            }
+        }
+
+        function renderizarCatalogo() { 
+            const l = document.getElementById('db-lista'); l.innerHTML = ''; 
+            for(let r in catalogo) { 
+                const p = catalogo[r]; 
+                l.innerHTML += `<div class="p-2 border-b flex justify-between items-center bg-white text-[9px] uppercase">
+                    <div onclick="cargarParaEditar('${r}')" class="flex-1">
+                        <b>${p.desc}</b><br>
+                        <span class="text-blue-600 font-bold">REF: ${r.slice(-4)}</span> | PLU: ${p.plu}
+                    </div>
+                    <button onclick="borrarDelCatalogoLista('${r}')" class="text-red-500 font-bold px-3 py-1"></button>
+                </div>`; 
+            } 
+        }
+
+        function borrarDelCatalogoLista(r) { if(confirm("¿Eliminar?")) { delete catalogo[r]; localStorage.setItem('catalogo_db', JSON.stringify(catalogo)); renderizarCatalogo(); } }
+        function cargarParaEditar(r) { document.getElementById('db-ref').value = r; verificarEnCatalogo(); }
+        async function detenerEscaner() { if (html5QrCode) { try { await html5QrCode.stop(); } catch(e){} html5QrCode = null; } document.getElementById('reader').style.display = 'none'; document.getElementById('reader-db').style.display = 'none'; }
+        
+        async function toggleScanner(tipo) { 
+            const rid = (tipo === 'surtido' ? 'reader' : 'reader-db'); 
+            if (document.getElementById(rid).style.display === 'none') { 
+                await detenerEscaner(); document.getElementById(rid).style.display = 'block'; 
+                html5QrCode = new Html5Qrcode(rid); 
+                html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (text) => { 
+                    if(tipo === 'surtido') { document.getElementById('ref').value = text; forzarBusquedaLupa(); }
+                    else { document.getElementById('db-ref').value = text; verificarEnCatalogo(); }
+                    detenerEscaner(); 
+                }).catch(err => alert("Error de cámara: El archivo debe abrirse desde un servidor HTTPS (como GitHub o Google Drive) para que funcione en otros celulares.")); 
+            } else { detenerEscaner(); } 
+        }
+
+        function guardarPerfil() { perfil.surtidor = document.getElementById('nombreSurtidor').value; perfil.almacen = document.getElementById('nombreAlmacen').value; localStorage.setItem('perfil_blaebuck', JSON.stringify(perfil)); }
+        function recalcularUnidadesModal() { const f = parseInt(document.getElementById('modalTipoCaja').value); const c = parseInt(document.getElementById('modalCantCajas').value) || 0; document.getElementById('modalUnidadesFinal').value = (f === 0 ? c : c * f); }
+        function cerrarModal() { document.getElementById('modalConfirmar').style.display = 'none'; }
+        function resetDBInputs() { ['db-ref','db-desc','db-gr','db-plu','db-marca','db-precio'].forEach(id => document.getElementById(id).value = ""); document.getElementById('btnEliminarDB').classList.add('hidden'); }
+        function resetSurtidoInputs() { document.getElementById('ref').value = ""; }
+        function vaciarTodo() { if(confirm("¿Limpiar lista?")){ registros = []; renderizar(); } }
+        function borrarTodoHistorial() { if(confirm("¿Limpiar historial?")) { historial = []; localStorage.setItem('historial_picking_v2', JSON.stringify(historial)); renderizarHistorial(); } }
+        function borrarItem(i) { registros.splice(i,1); renderizar(); }
+
+        window.onload = () => { 
+            document.getElementById('fechaPicking').value = new Date().toISOString().split('T')[0];
+            document.getElementById('nombreSurtidor').value = perfil.surtidor || '';
+            document.getElementById('nombreAlmacen').value = perfil.almacen || '';
+            renderizar(); renderizarCatalogo(); 
+        };
+    </script>
+</body>
+</html>
