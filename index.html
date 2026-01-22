@@ -2,8 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Surtido Maestro - Blaebuck Files</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -15,6 +14,7 @@
         .tab-active { border-bottom: 3px solid #1e40af; color: #1e40af; font-weight: bold; }
         #reader { width: 100%; border-radius: 12px; overflow: hidden; background: #000; margin-top: 10px; display: none; min-height: 250px; }
         .modal-overlay { background: rgba(0,0,0,0.8); display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        button { cursor: pointer; }
     </style>
 </head>
 <body class="p-4">
@@ -56,7 +56,7 @@
 
     <div class="max-w-md mx-auto">
         <div class="flex justify-around mb-4 bg-white rounded-lg p-2 shadow-sm sticky top-0 z-50">
-            <button onclick="switchTab('surtido')" id="btn-surtido" class="tab-active py-2 px-4 text-xs uppercase">Surtido</button>
+            <button onclick="switchTab('surtido')" id="btn-surtido" class="tab-active py-2 px-4 text-xs uppercase text-blue-900">Surtido</button>
             <button onclick="switchTab('precios')" id="btn-precios" class="py-2 px-4 text-gray-500 text-xs uppercase">Catálogo</button>
             <button onclick="switchTab('historial')" id="btn-historial" class="py-2 px-4 text-gray-500 text-xs uppercase">Historial</button>
         </div>
@@ -70,7 +70,7 @@
             </div>
             
             <div class="card p-4 mb-4">
-                <button onclick="toggleScanner()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold uppercase text-xs">📷 Cámara Surtido</button>
+                <button onclick="toggleScanner()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold uppercase text-xs">CAMARA SURTIDO</button>
                 <div id="reader"></div>
             </div>
 
@@ -81,14 +81,14 @@
                 </div>
                 <div class="flex gap-1">
                     <input id="ref" type="text" placeholder="REF / PLU / EAN" class="flex-1 p-2 rounded-lg bg-blue-50 font-bold border border-blue-100 uppercase">
-                    <button onclick="forzarBusquedaLupa()" class="bg-blue-600 text-white px-4 rounded-lg">🔍</button>
+                    <button onclick="forzarBusquedaLupa()" class="bg-blue-600 text-white px-4 rounded-lg">BUSCAR</button>
                 </div>
             </div>
 
             <div class="card overflow-hidden mb-4">
                 <div class="bg-gray-800 text-white p-2 flex justify-between items-center text-[9px] font-bold uppercase">
                     <span>Listado de Surtido</span>
-                    <button onclick="vaciarTodo()" class="bg-red-700 px-2 py-1 rounded text-[8px]">Barrer Todo</button>
+                    <button onclick="vaciarTodo()" class="bg-red-700 px-2 py-1 rounded text-[8px]">Limpiar Todo</button>
                 </div>
                 <table class="w-full text-[11px] text-left">
                     <thead class="bg-gray-100 text-gray-600 text-[8px] uppercase">
@@ -103,7 +103,7 @@
 
             <div class="card p-4 mb-10">
                 <input id="fechaPicking" type="date" class="w-full p-2 border rounded font-bold mb-2">
-                <button onclick="finalizarDia()" class="w-full p-3 bg-green-600 text-white rounded-lg font-bold uppercase">Guardar en Historial</button>
+                <button onclick="finalizarDia()" class="w-full p-3 bg-green-600 text-white rounded-lg font-bold uppercase shadow-lg">Guardar en Historial</button>
             </div>
         </div>
 
@@ -111,7 +111,7 @@
             <div class="card p-4 mb-4 bg-green-50 border border-green-200">
                 <h3 class="font-black text-green-800 text-[10px] uppercase mb-2 italic">Registro de Productos</h3>
                 <div class="grid grid-cols-1 gap-2">
-                    <input id="db-ref" type="text" placeholder="CÓDIGO EAN" class="p-2 rounded border font-bold">
+                    <input id="db-ref" type="text" placeholder="CODIGO EAN" class="p-2 rounded border font-bold">
                     <input id="db-desc" type="text" placeholder="NOMBRE PRODUCTO" class="p-2 rounded border uppercase font-bold">
                     <div class="grid grid-cols-2 gap-2">
                         <input id="db-plu" type="text" placeholder="PLU" class="p-2 rounded border font-bold">
@@ -133,33 +133,51 @@
     </div>
 
     <script>
+        // URL DE TU GOOGLE SCRIPT
         const URL_GOOGLE = "https://script.google.com/macros/s/AKfycbxNj_qkhubhEUJHZtOZOzI23iTxnxBwzfjlBmneNAdmCb0YcKd3RL6xWZ3Ei1B9UgW5Cg/exec";
 
+        // VARIABLES GLOBALES
         let registros = JSON.parse(localStorage.getItem('surtido_v21_final')) || [];
         let catalogo = JSON.parse(localStorage.getItem('catalogo_db')) || {};
         let historial = JSON.parse(localStorage.getItem('historial_picking_v2')) || [];
         let perfil = JSON.parse(localStorage.getItem('perfil_blaebuck')) || { surtidor: '', almacen: '' };
-        
         let html5QrCode = null; 
         let pEscaneado = null;
 
+        // FUNCION CAMBIO DE PESTAÑA (CORREGIDA)
         function switchTab(t) {
             detenerEscaner();
-            document.getElementById('tab-surtido').classList.toggle('hidden', t !== 'surtido');
-            document.getElementById('tab-precios').classList.toggle('hidden', t !== 'precios');
-            document.getElementById('tab-historial').classList.toggle('hidden', t !== 'historial');
+            document.getElementById('tab-surtido').classList.add('hidden');
+            document.getElementById('tab-precios').classList.add('hidden');
+            document.getElementById('tab-historial').classList.add('hidden');
+            
+            document.getElementById('tab-' + t).classList.remove('hidden');
+
+            document.getElementById('btn-surtido').className = "py-2 px-4 text-gray-500 text-xs uppercase";
+            document.getElementById('btn-precios').className = "py-2 px-4 text-gray-500 text-xs uppercase";
+            document.getElementById('btn-historial').className = "py-2 px-4 text-gray-500 text-xs uppercase";
+            document.getElementById('btn-' + t).className = "tab-active py-2 px-4 text-xs uppercase text-blue-900";
+
             if(t === 'historial') renderizarHistorial();
+            if(t === 'precios') renderizarCatalogo();
         }
 
+        // BUSQUEDA
         function forzarBusquedaLupa() {
             const v = document.getElementById('ref').value.trim();
+            if(!v) return;
             let e = Object.keys(catalogo).find(k => k === v || k.endsWith(v) || (catalogo[k] && catalogo[k].plu === v));
-            if (e) { pEscaneado = { ref: e, ...catalogo[e] }; abrirFicha(); }
-            else { alert("Producto no registrado."); }
+            if (e) { 
+                pEscaneado = { ref: e, ...catalogo[e] }; 
+                abrirFicha(); 
+                document.getElementById('ref').value = "";
+            } else { 
+                alert("Producto no registrado en catalogo."); 
+            }
         }
 
         function abrirFicha() {
-            document.getElementById('modalPrecioTag').innerText = pEscaneado.precio + " $";
+            document.getElementById('modalPrecioTag').innerText = (pEscaneado.precio || 0) + " $";
             document.getElementById('modalFicha').innerHTML = `<span class="text-blue-900 font-black">${pEscaneado.desc}</span><br><span class="text-xs">PLU: ${pEscaneado.plu}</span>`;
             document.getElementById('modalConfirmar').style.display = 'flex';
             document.getElementById('btnAccionModal').onclick = guardarPicking;
@@ -170,17 +188,19 @@
             const f = parseInt(document.getElementById('modalTipoCaja').value);
             const c = (f === 0) ? 0 : (parseInt(document.getElementById('modalCantCajas').value) || 0); 
             
-            if(u <= 0) return alert("Cantidad inválida");
+            if(u <= 0) return alert("Cantidad invalida");
             registros.push({ ...pEscaneado, totalCajas: c, unidadesDeCajas: u }); 
-            renderizar(); cerrarModal(); 
-            fetch(`${URL_GOOGLE}?surtidor=${perfil.surtidor}&almacen=${perfil.almacen}&producto=${pEscaneado.desc}&cantidad=${u}`, {mode:'no-cors'});
+            renderizar(); 
+            cerrarModal(); 
         }
 
         function renderizar() { 
-            const l = document.getElementById('listaSurtido'); l.innerHTML = ''; let t = 0; 
+            const l = document.getElementById('listaSurtido'); 
+            l.innerHTML = ''; 
+            let t = 0; 
             registros.forEach((item, i) => { 
                 t += item.unidadesDeCajas; 
-                l.innerHTML += `<tr class="border-b"><td class="p-2"><b>${item.desc}</b></td><td class="p-2 text-center">${item.totalCajas}</td><td class="p-2 text-center font-bold bg-blue-50">${item.unidadesDeCajas}</td><td class="p-2"><button onclick="borrarItem(${i})">❌</button></td></tr>`; 
+                l.innerHTML += `<tr class="border-b"><td class="p-2"><b>${item.desc}</b></td><td class="p-2 text-center">${item.totalCajas}</td><td class="p-2 text-center font-bold bg-blue-50">${item.unidadesDeCajas}</td><td class="p-2"><button onclick="borrarItem(${i})" class="text-red-500 font-bold">X</button></td></tr>`; 
             }); 
             document.getElementById('granTotal').innerText = t; 
             localStorage.setItem('surtido_v21_final', JSON.stringify(registros)); 
@@ -189,14 +209,17 @@
         function finalizarDia() {
             const s = document.getElementById('nombreSurtidor').value;
             const a = document.getElementById('nombreAlmacen').value;
-            if(!s || !a || registros.length === 0) return alert("Faltan datos o lista vacía.");
+            if(!s || !a || registros.length === 0) return alert("Faltan datos o lista vacia.");
             historial.unshift({ fecha: document.getElementById('fechaPicking').value, surtidor: s, almacen: a, total: document.getElementById('granTotal').innerText, items: [...registros] });
             localStorage.setItem('historial_picking_v2', JSON.stringify(historial));
-            registros = []; renderizar(); alert("Guardado en Historial.");
+            registros = []; 
+            renderizar(); 
+            alert("Guardado en Historial local.");
         }
 
         function renderizarHistorial() { 
-            const l = document.getElementById('listaHistorial'); l.innerHTML = ''; 
+            const l = document.getElementById('listaHistorial'); 
+            l.innerHTML = ''; 
             historial.forEach((h, i) => { 
                 l.innerHTML += `<div class="p-3 bg-white rounded-lg border-l-4 border-blue-900 flex justify-between items-center text-[10px] uppercase font-bold">
                     <div>${h.fecha} - ${h.almacen}<br><span class="text-blue-700">${h.total} UNIDADES</span></div>
@@ -206,40 +229,79 @@
         }
 
         function descargarPDF(idx) {
-            const h = historial[idx]; const { jsPDF } = window.jspdf; const doc = new jsPDF();
-            doc.text(`REPORTE: ${h.almacen}`, 10, 10);
-            doc.autoTable({ startY: 20, head: [['Producto', 'PLU', 'Cant']], body: h.items.map(it => [it.desc, it.plu, it.unidadesDeCajas]) });
+            const h = historial[idx]; 
+            const { jsPDF } = window.jspdf; 
+            const doc = new jsPDF();
+            doc.text(`REPORTE DE SURTIDO: ${h.almacen}`, 10, 10);
+            doc.text(`SURTIDOR: ${h.surtidor}`, 10, 20);
+            doc.autoTable({ startY: 30, head: [['Producto', 'PLU', 'Cant']], body: h.items.map(it => [it.desc, it.plu, it.unidadesDeCajas]) });
             doc.save(`Reporte_${h.almacen}.pdf`);
         }
 
         function guardarEnCatalogo() { 
             const r = document.getElementById('db-ref').value.trim();
-            if(!r) return alert("Falta el código");
-            catalogo[r] = { desc: document.getElementById('db-desc').value.toUpperCase(), plu: document.getElementById('db-plu').value, marca: document.getElementById('db-marca').value.toUpperCase(), precio: document.getElementById('db-precio').value }; 
+            if(!r) return alert("Falta el codigo");
+            catalogo[r] = { 
+                desc: document.getElementById('db-desc').value.toUpperCase(), 
+                plu: document.getElementById('db-plu').value, 
+                marca: document.getElementById('db-marca').value.toUpperCase(), 
+                precio: document.getElementById('db-precio').value 
+            }; 
             localStorage.setItem('catalogo_db', JSON.stringify(catalogo)); 
-            renderizarCatalogo(); alert("Registrado.");
+            renderizarCatalogo(); 
+            alert("Producto guardado en memoria local.");
         }
 
         function renderizarCatalogo() { 
-            const l = document.getElementById('db-lista'); l.innerHTML = ''; 
-            for(let r in catalogo) { l.innerHTML += `<div class="p-1 border-b">${catalogo[r].desc} [${r}]</div>`; } 
+            const l = document.getElementById('db-lista'); 
+            l.innerHTML = ''; 
+            for(let r in catalogo) { 
+                l.innerHTML += `<div class="p-1 border-b text-[9px]">${catalogo[r].desc} [REF: ${r}]</div>`; 
+            } 
         }
 
         async function sincronizarConNube() {
             try {
                 const res = await fetch(URL_GOOGLE + "?action=getCatalog");
                 const data = await res.json();
-                if(data) { catalogo = data; localStorage.setItem('catalogo_db', JSON.stringify(catalogo)); renderizarCatalogo(); alert("Sincronizado."); }
-            } catch(e) { alert("Error de red."); }
+                if(data) { 
+                    catalogo = data; 
+                    localStorage.setItem('catalogo_db', JSON.stringify(catalogo)); 
+                    renderizarCatalogo(); 
+                    alert("Catalogo actualizado desde la nube."); 
+                }
+            } catch(e) { alert("Error de red al conectar con Google."); }
         }
 
-        async function detenerEscaner() { if (html5QrCode) { try { await html5QrCode.stop(); } catch(e){} html5QrCode = null; } document.getElementById('reader').style.display='none'; }
+        // CAMARA (CORREGIDA)
+        async function detenerEscaner() { 
+            if (html5QrCode) { 
+                try { await html5QrCode.stop(); } catch(e){} 
+                html5QrCode = null; 
+            } 
+            document.getElementById('reader').style.display='none'; 
+        }
+
         async function toggleScanner() { 
-            await detenerEscaner(); document.getElementById('reader').style.display = 'block';
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (text) => {
-                document.getElementById('ref').value = text; forzarBusquedaLupa(); detenerEscaner();
-            }).catch(e => alert("Permiso de cámara denegado."));
+            const display = document.getElementById('reader').style.display;
+            if(display === 'block') {
+                detenerEscaner();
+            } else {
+                document.getElementById('reader').style.display = 'block';
+                html5QrCode = new Html5Qrcode("reader");
+                html5QrCode.start(
+                    { facingMode: "environment" }, 
+                    { fps: 15, qrbox: 250 }, 
+                    (text) => {
+                        document.getElementById('ref').value = text; 
+                        forzarBusquedaLupa(); 
+                        detenerEscaner();
+                    }
+                ).catch(e => {
+                    alert("Error: Asegurate de usar HTTPS y dar permisos de camara.");
+                    detenerEscaner();
+                });
+            }
         }
 
         function recalcularUnidadesModal() { 
@@ -250,13 +312,18 @@
         function cerrarModal() { document.getElementById('modalConfirmar').style.display = 'none'; }
         function borrarItem(i) { registros.splice(i,1); renderizar(); }
         function vaciarTodo() { if(confirm("¿Limpiar lista?")){ registros = []; renderizar(); } }
-        function guardarPerfil() { perfil.surtidor = document.getElementById('nombreSurtidor').value; perfil.almacen = document.getElementById('nombreAlmacen').value; localStorage.setItem('perfil_blaebuck', JSON.stringify(perfil)); }
+        function guardarPerfil() { 
+            perfil.surtidor = document.getElementById('nombreSurtidor').value; 
+            perfil.almacen = document.getElementById('nombreAlmacen').value; 
+            localStorage.setItem('perfil_blaebuck', JSON.stringify(perfil)); 
+        }
 
         window.onload = () => { 
             document.getElementById('fechaPicking').value = new Date().toISOString().split('T')[0];
             document.getElementById('nombreSurtidor').value = perfil.surtidor || '';
             document.getElementById('nombreAlmacen').value = perfil.almacen || '';
-            renderizar(); renderizarCatalogo(); 
+            renderizar(); 
+            renderizarCatalogo(); 
         };
     </script>
 </body>
