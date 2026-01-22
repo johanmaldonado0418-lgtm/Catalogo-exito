@@ -70,7 +70,7 @@
             </div>
             
             <div class="card p-4 mb-4">
-                <button onclick="toggleScanner()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold uppercase text-xs"> Cámara Surtido</button>
+                <button onclick="toggleScanner()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold uppercase text-xs">📷 Cámara Surtido</button>
                 <div id="reader"></div>
             </div>
 
@@ -81,7 +81,7 @@
                 </div>
                 <div class="flex gap-1">
                     <input id="ref" type="text" placeholder="REF / PLU / EAN" class="flex-1 p-2 rounded-lg bg-blue-50 font-bold border border-blue-100 uppercase">
-                    <button onclick="forzarBusquedaLupa()" class="bg-blue-600 text-white px-4 rounded-lg"></button>
+                    <button onclick="forzarBusquedaLupa()" class="bg-blue-600 text-white px-4 rounded-lg">🔍</button>
                 </div>
             </div>
 
@@ -180,7 +180,7 @@
             const l = document.getElementById('listaSurtido'); l.innerHTML = ''; let t = 0; 
             registros.forEach((item, i) => { 
                 t += item.unidadesDeCajas; 
-                l.innerHTML += `<tr class="border-b"><td class="p-2"><b>${item.desc}</b></td><td class="p-2 text-center">${item.totalCajas}</td><td class="p-2 text-center font-bold bg-blue-50">${item.unidadesDeCajas}</td><td class="p-2"><button onclick="borrarItem(${i})"></button></td></tr>`; 
+                l.innerHTML += `<tr class="border-b"><td class="p-2"><b>${item.desc}</b></td><td class="p-2 text-center">${item.totalCajas}</td><td class="p-2 text-center font-bold bg-blue-50">${item.unidadesDeCajas}</td><td class="p-2"><button onclick="borrarItem(${i})">❌</button></td></tr>`; 
             }); 
             document.getElementById('granTotal').innerText = t; 
             localStorage.setItem('surtido_v21_final', JSON.stringify(registros)); 
