@@ -64,18 +64,18 @@
     <div class="max-w-md mx-auto">
         <div class="flex justify-around mb-4 bg-white rounded-lg p-2 shadow-sm sticky top-0 z-50">
             <button onclick="switchTab('surtido')" id="btn-surtido" class="tab-active py-2 px-4 text-sm uppercase">Surtido</button>
-            <button onclick="switchTab('precios')" id="btn-precios" class="py-2 px-4 text-gray-500 text-sm uppercase">Cat·logo</button>
+            <button onclick="switchTab('precios')" id="btn-precios" class="py-2 px-4 text-gray-500 text-sm uppercase">Cat√°logo</button>
             <button onclick="switchTab('historial')" id="btn-historial" class="py-2 px-4 text-gray-500 text-sm uppercase">Historial</button>
         </div>
 
         <div id="tab-surtido">
             <div class="card p-4 mb-4 border border-blue-100 grid grid-cols-2 gap-2">
                 <div><label class="text-[9px] font-black text-blue-900 uppercase">Surtidor</label><input id="nombreSurtidor" type="text" class="w-full p-2 border rounded text-xs font-bold uppercase" oninput="guardarPerfil()"></div>
-                <div><label class="text-[9px] font-black text-blue-900 uppercase">AlmacÈn</label><input id="nombreAlmacen" type="text" class="w-full p-2 border rounded text-xs font-bold uppercase" oninput="guardarPerfil()"></div>
+                <div><label class="text-[9px] font-black text-blue-900 uppercase">Almac√©n</label><input id="nombreAlmacen" type="text" class="w-full p-2 border rounded text-xs font-bold uppercase" oninput="guardarPerfil()"></div>
             </div>
             
             <div class="card p-4 mb-4 border border-blue-200">
-                <button onclick="toggleScanner('surtido')" id="btn-scanner" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold uppercase text-xs"> C·mara Surtido</button>
+                <button onclick="toggleScanner('surtido')" id="btn-scanner" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold uppercase text-xs">üì∏ C√°mara Surtido</button>
                 <div id="reader"></div>
             </div>
 
@@ -83,27 +83,27 @@
                 <div class="flex justify-between items-center mb-2">
                     <div class="flex items-center gap-2">
                         <label class="text-[9px] font-black text-blue-900 uppercase italic">Buscador Maestro</label>
-                        <button onclick="toggleDropdownCatalogo()" class="bg-blue-100 text-blue-700 px-2 rounded font-bold text-xs"></button>
+                        <button onclick="toggleDropdownCatalogo()" class="bg-blue-100 text-blue-700 px-2 rounded font-bold text-xs">üîç</button>
                     </div>
-                    <button onclick="sincronizarConNube()" class="text-blue-600 font-black text-[10px] uppercase italic animate-pulse"> Actualizar Nube</button>
+                    <button onclick="sincronizarConNube()" class="text-blue-600 font-black text-[10px] uppercase italic animate-pulse">üîÑ Actualizar Nube</button>
                 </div>
                 
                 <div id="dropdownCatalogo" class="dropdown-content"></div>
 
                 <div class="flex gap-1">
-                    <button onclick="resetSurtidoInputs()" class="bg-gray-200 px-3 rounded-lg text-lg"></button>
+                    <button onclick="resetSurtidoInputs()" class="bg-gray-200 px-3 rounded-lg text-lg">üßπ</button>
                     <input id="ref" type="text" placeholder="REF / PLU / EAN" oninput="busquedaDinamica()" class="flex-1 p-2 rounded-lg bg-blue-50 font-bold border border-blue-100 uppercase">
-                    <button onclick="forzarBusquedaLupa()" class="bg-blue-600 text-white p-2 rounded-lg text-lg"></button>
+                    <button onclick="forzarBusquedaLupa()" class="bg-blue-600 text-white p-2 rounded-lg text-lg">üîé</button>
                 </div>
             </div>
 
             <div class="card overflow-hidden mb-4">
                 <div class="bg-gray-800 text-white p-2 flex justify-between items-center text-[8px] uppercase font-bold">
                     <span>Listado de Surtido</span>
-                    <button onclick="vaciarTodo()" class="bg-red-700 px-2 py-1 rounded italic text-[7px]"> Barrer Todo</button>
+                    <button onclick="vaciarTodo()" class="bg-red-700 px-2 py-1 rounded italic text-[7px]">üóëÔ∏è Barrer Todo</button>
                 </div>
                 <table class="w-full text-[11px] text-left">
-                    <thead class="bg-gray-100 text-gray-600 uppercase text-[8px]"><tr><th class="p-2">ArtÌculo</th><th class="p-2 text-center">Caj</th><th class="p-2 text-center">U.Tot</th><th class="p-2"></th></tr></thead>
+                    <thead class="bg-gray-100 text-gray-600 uppercase text-[8px]"><tr><th class="p-2">Art√≠culo</th><th class="p-2 text-center">Caj</th><th class="p-2 text-center">U.Tot</th><th class="p-2"></th></tr></thead>
                     <tbody id="listaSurtido" class="divide-y divide-gray-100"></tbody>
                     <tfoot class="bg-blue-900 text-white font-black italic"><tr><td colspan="2" class="p-3 text-right text-[10px]">TOTAL:</td><td id="granTotal" class="p-3 text-center text-lg">0</td><td></td></tr></tfoot>
                 </table>
@@ -111,24 +111,24 @@
 
             <div class="card p-4 mb-10 border border-green-200">
                 <input id="fechaPicking" type="date" class="w-full p-2 border rounded font-bold text-blue-900 mb-2">
-                <button onclick="finalizarDia()" class="w-full p-3 bg-green-600 text-white rounded-lg text-[11px] font-bold uppercase shadow-lg"> Guardar en Historial</button>
+                <button onclick="finalizarDia()" class="w-full p-3 bg-green-600 text-white rounded-lg text-[11px] font-bold uppercase shadow-lg">üíæ Guardar en Historial</button>
             </div>
         </div>
 
         <div id="tab-precios" class="hidden">
             <div class="card p-4 mb-4 border border-green-200">
-                <button onclick="toggleScanner('catalogo')" class="w-full bg-green-700 text-white py-2 rounded-lg font-bold uppercase text-xs"> C·mara Cat·logo</button>
+                <button onclick="toggleScanner('catalogo')" class="w-full bg-green-700 text-white py-2 rounded-lg font-bold uppercase text-xs">üì∏ C√°mara Cat√°logo</button>
                 <div id="reader-db"></div>
             </div>
             <div class="card p-4 mb-4 bg-green-50 border border-green-200">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="font-black text-green-800 text-[10px] uppercase italic">Editor de Productos</h3>
-                    <button onclick="resetDBInputs()" class="text-green-600 text-[10px] font-bold uppercase"> Limpiar</button>
+                    <button onclick="resetDBInputs()" class="text-green-600 text-[10px] font-bold uppercase">üßπ Limpiar</button>
                 </div>
                 <div class="grid grid-cols-1 gap-2">
                     <div class="flex gap-1">
-                        <input id="db-ref" type="text" placeholder="CÛdigo / PLU" class="flex-1 p-2 rounded border font-bold uppercase">
-                        <button onclick="verificarEnCatalogo()" class="bg-green-700 text-white p-2 rounded-lg"></button>
+                        <input id="db-ref" type="text" placeholder="C√≥digo / PLU" class="flex-1 p-2 rounded border font-bold uppercase">
+                        <button onclick="verificarEnCatalogo()" class="bg-green-700 text-white p-2 rounded-lg">üîé</button>
                     </div>
                     <div class="flex gap-2">
                         <input id="db-desc" type="text" placeholder="Nombre" class="flex-1 p-2 rounded border uppercase font-bold">
@@ -152,8 +152,8 @@
         <div id="tab-historial" class="hidden">
             <div class="card p-4 mb-4 bg-blue-50 border border-blue-200">
                 <div class="flex justify-between items-center mb-3">
-                    <h2 class="font-black text-blue-900 text-[10px] uppercase italic">Reportes HistÛricos</h2>
-                    <button onclick="borrarTodoHistorial()" class="bg-red-600 text-white text-[9px] px-2 py-1 rounded font-black uppercase italic"> Limpiar Todo</button>
+                    <h2 class="font-black text-blue-900 text-[10px] uppercase italic">Reportes Hist√≥ricos</h2>
+                    <button onclick="borrarTodoHistorial()" class="bg-red-600 text-white text-[9px] px-2 py-1 rounded font-black uppercase italic">üóëÔ∏è Limpiar Todo</button>
                 </div>
                 <div id="listaHistorial" class="space-y-3"></div>
             </div>
@@ -180,10 +180,10 @@
                     catalogo = data;
                     localStorage.setItem('catalogo_db', JSON.stringify(catalogo));
                     renderizarCatalogo();
-                    alert("°Cat·logo Blaebuck sincronizado!");
+                    alert("¬°Cat√°logo Blaebuck sincronizado!");
                 }
             } catch (error) {
-                alert("Error de conexiÛn. Intenta de nuevo.");
+                alert("Error de conexi√≥n. Intenta de nuevo.");
             }
             document.getElementById('loading-overlay').style.display = 'none';
         }
@@ -214,7 +214,7 @@
             dropdown.innerHTML = '';
             const claves = Object.keys(catalogo);
             if(claves.length === 0) {
-                dropdown.innerHTML = '<div class="p-4 text-center text-xs text-gray-400">CAT¡LOGO VACÕO</div>';
+                dropdown.innerHTML = '<div class="p-4 text-center text-xs text-gray-400">CAT√ÅLOGO VAC√çO</div>';
                 return;
             }
             claves.sort((a,b) => catalogo[a].desc.localeCompare(catalogo[b].desc)).forEach(ref => {
@@ -285,7 +285,7 @@
                 method: 'POST',
                 mode: 'no-cors',
                 body: JSON.stringify({
-                    surtidor: document.getElementById('nombreSurtidor').value || "AN”NIMO",
+                    surtidor: document.getElementById('nombreSurtidor').value || "AN√ìNIMO",
                     almacen: document.getElementById('nombreAlmacen').value || "GENERAL",
                     producto: pEscaneado.desc,
                     plu: pEscaneado.plu,
@@ -302,7 +302,7 @@
 
         function renderizar() { 
             const l = document.getElementById('listaSurtido'); l.innerHTML = ''; let t = 0; 
-            registros.forEach((item, i) => { t += item.unidadesDeCajas; l.innerHTML += `<tr class="border-b"><td class="p-2"><div class="font-bold text-[10px] text-blue-700 leading-tight">${item.desc}</div><div class="text-[9px] text-red-800 font-bold">REF: ${item.ref.slice(-4)}</div></td><td class="p-2 text-center text-gray-400 font-bold">${item.totalCajas}</td><td class="p-2 text-center font-black bg-blue-50 text-blue-800">${item.unidadesDeCajas}</td><td class="p-2 text-right"><button onclick="borrarItem(${i})" class="text-red-300"></button></td></tr>`; }); 
+            registros.forEach((item, i) => { t += item.unidadesDeCajas; l.innerHTML += `<tr class="border-b"><td class="p-2"><div class="font-bold text-[10px] text-blue-700 leading-tight">${item.desc}</div><div class="text-[9px] text-red-800 font-bold">REF: ${item.ref.slice(-4)}</div></td><td class="p-2 text-center text-gray-400 font-bold">${item.totalCajas}</td><td class="p-2 text-center font-black bg-blue-50 text-blue-800">${item.unidadesDeCajas}</td><td class="p-2 text-right"><button onclick="borrarItem(${i})" class="text-red-300">‚ùå</button></td></tr>`; }); 
             document.getElementById('granTotal').innerText = t; 
             localStorage.setItem('surtido_v21_final', JSON.stringify(registros)); 
         }
@@ -337,16 +337,16 @@
                 l.innerHTML += `
                 <div class="p-3 bg-white rounded-lg border-l-4 border-blue-900 mb-2 flex justify-between items-center">
                     <div onclick="generarPDF(${i})" class="flex-1">
-                        <div class="font-black text-[10px] uppercase"> ${h.fecha} | ${h.almacen}</div>
+                        <div class="font-black text-[10px] uppercase">üìÑ ${h.fecha} | ${h.almacen}</div>
                         <div class="text-blue-900 text-xs font-bold">${h.total} UNIDADES SURTIDAS</div>
                     </div>
-                    <button onclick="borrarDelHistorial(${i})" class="text-red-500 font-bold px-2"></button>
+                    <button onclick="borrarDelHistorial(${i})" class="text-red-500 font-bold px-2">‚ùå</button>
                 </div>`; 
             }); 
         }
 
         function borrarDelHistorial(idx) {
-            if(confirm("øEliminar reporte?")) {
+            if(confirm("¬øEliminar reporte?")) {
                 historial.splice(idx, 1);
                 localStorage.setItem('historial_picking_v2', JSON.stringify(historial));
                 renderizarHistorial();
@@ -361,11 +361,11 @@
             doc.setFont(undefined, 'bold');
             doc.rect(40, 40, 532, 40); 
             doc.text(`SURTIDOR: ${h.surtidor.toUpperCase()}`, 50, 56);
-            doc.text(`ALMAC…N: ${h.almacen.toUpperCase()}`, 240, 56);
+            doc.text(`ALMAC√âN: ${h.almacen.toUpperCase()}`, 240, 56);
             doc.text(`FECHA: ${h.fecha}`, 450, 56);
             doc.autoTable({
                 startY: 90,
-                head: [['#', 'DESCRIPCI”N', 'MARCA', 'REF', 'PLU', 'SOL.', 'ENT.']],
+                head: [['#', 'DESCRIPCI√ìN', 'MARCA', 'REF', 'PLU', 'SOL.', 'ENT.']],
                 body: h.items.map((it, i) => [i + 1, it.desc.toUpperCase(), it.marca.toUpperCase(), it.ref, it.plu, it.unidadesDeCajas, it.unidadesDeCajas]),
                 theme: 'grid',
                 styles: { fontSize: 7 }
@@ -403,7 +403,7 @@
 
         function eliminarProductoActual() {
             const r = document.getElementById('db-ref').value.trim();
-            if(r && confirm(`øEliminar ${catalogo[r].desc}?`)) {
+            if(r && confirm(`¬øEliminar ${catalogo[r].desc}?`)) {
                 delete catalogo[r];
                 localStorage.setItem('catalogo_db', JSON.stringify(catalogo));
                 renderizarCatalogo(); resetDBInputs();
@@ -419,12 +419,12 @@
                         <b>${p.desc}</b><br>
                         <span class="text-blue-600 font-bold">REF: ${r.slice(-4)}</span> | PLU: ${p.plu}
                     </div>
-                    <button onclick="borrarDelCatalogoLista('${r}')" class="text-red-500 font-bold px-3 py-1"></button>
+                    <button onclick="borrarDelCatalogoLista('${r}')" class="text-red-500 font-bold px-3 py-1">‚ùå</button>
                 </div>`; 
             } 
         }
 
-        function borrarDelCatalogoLista(r) { if(confirm("øEliminar?")) { delete catalogo[r]; localStorage.setItem('catalogo_db', JSON.stringify(catalogo)); renderizarCatalogo(); } }
+        function borrarDelCatalogoLista(r) { if(confirm("¬øEliminar?")) { delete catalogo[r]; localStorage.setItem('catalogo_db', JSON.stringify(catalogo)); renderizarCatalogo(); } }
         function cargarParaEditar(r) { document.getElementById('db-ref').value = r; verificarEnCatalogo(); }
         async function detenerEscaner() { if (html5QrCode) { try { await html5QrCode.stop(); } catch(e){} html5QrCode = null; } document.getElementById('reader').style.display = 'none'; document.getElementById('reader-db').style.display = 'none'; }
         
@@ -437,7 +437,7 @@
                     if(tipo === 'surtido') { document.getElementById('ref').value = text; forzarBusquedaLupa(); }
                     else { document.getElementById('db-ref').value = text; verificarEnCatalogo(); }
                     detenerEscaner(); 
-                }).catch(err => alert("Error de c·mara: El archivo debe abrirse desde un servidor HTTPS (como GitHub o Google Drive) para que funcione en otros celulares.")); 
+                }).catch(err => alert("Error de c√°mara: El archivo debe abrirse desde un servidor HTTPS (como GitHub o Google Drive) para que funcione en otros celulares.")); 
             } else { detenerEscaner(); } 
         }
 
@@ -446,8 +446,8 @@
         function cerrarModal() { document.getElementById('modalConfirmar').style.display = 'none'; }
         function resetDBInputs() { ['db-ref','db-desc','db-gr','db-plu','db-marca','db-precio'].forEach(id => document.getElementById(id).value = ""); document.getElementById('btnEliminarDB').classList.add('hidden'); }
         function resetSurtidoInputs() { document.getElementById('ref').value = ""; }
-        function vaciarTodo() { if(confirm("øLimpiar lista?")){ registros = []; renderizar(); } }
-        function borrarTodoHistorial() { if(confirm("øLimpiar historial?")) { historial = []; localStorage.setItem('historial_picking_v2', JSON.stringify(historial)); renderizarHistorial(); } }
+        function vaciarTodo() { if(confirm("¬øLimpiar lista?")){ registros = []; renderizar(); } }
+        function borrarTodoHistorial() { if(confirm("¬øLimpiar historial?")) { historial = []; localStorage.setItem('historial_picking_v2', JSON.stringify(historial)); renderizarHistorial(); } }
         function borrarItem(i) { registros.splice(i,1); renderizar(); }
 
         window.onload = () => { 
